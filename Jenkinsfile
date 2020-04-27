@@ -20,14 +20,14 @@ def parallelSteps = [:]
 def releaseData = []
 
 pipeline {
-    agent {
-        node {
-            label 'centos7-docker-4c-2g'
-        }
-    }
+    agent { label 'centos7-docker-4c-2g' }
     options {
         timestamps()
         timeout(360)
+    }
+    environment {
+        DRY_RUN = 'false'
+        RELEASE_DOCKER_SETTINGS = 'cd-management-settings'
     }
     stages {   
         stage('Lint YAML files') {
@@ -47,7 +47,7 @@ pipeline {
         stage('Prepare Release YAML') {
             steps {
                 script {
-                    releaseData = edgeXRelease.collectReleaseYamlFiles()
+                    releaseData = edgeXRelease.collectReleaseYamlFiles('release/*.yaml', 'origin/release')
                     parallelSteps = edgeXRelease.parallelStepFactory(releaseData)
 
                     // Print out the arrays created from the yaml files for manual validation
